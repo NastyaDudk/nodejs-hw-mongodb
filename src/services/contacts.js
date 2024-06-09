@@ -15,7 +15,6 @@ export const getContactById = async (id) => {
     const contact = await ContactsCollection.findOne({ _id: id });
     return contact;
   } catch (error) {
-    console.error('Error while fetching contact by id:', error);
-    return null;
+    throw new Error(`Error while fetching contact by id: ${error.message}`);
   }
 };
