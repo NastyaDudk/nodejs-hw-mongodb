@@ -43,12 +43,10 @@ export const setupServer = () => {
     });
   });
 
-  // 404 handler
   app.use((req, res) => {
     res.status(404).json({ message: 'Not found' });
   });
 
-  // General error handler
   app.use((err, req, res, next) => {
     res
       .status(500)
