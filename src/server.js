@@ -15,6 +15,10 @@ export const setupServer = () => {
   app.use(express.json());
   app.use(cors());
 
+  app.get('/', (req, res) => {
+    res.send('Hello. Very hard HomeWork...😩');
+  });
+
   app.use(router);
 
   app.use(
