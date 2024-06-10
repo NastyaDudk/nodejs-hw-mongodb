@@ -25,11 +25,8 @@ export const setupServer = () => {
     }),
   );
 
-  // 404 handler
-
   app.use(notFoundHandler);
 
-  // General error handler
   app.use(errorHandler);
 
   const PORT = env(ENV_VARS.PORT, 3000);
