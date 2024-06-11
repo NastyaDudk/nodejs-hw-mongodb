@@ -16,7 +16,7 @@ export const setupServer = () => {
   app.use(cors());
 
   app.get('/', (req, res) => {
-    res.send('Hello. Very hard HomeWork...😩');
+    res.send('Hello...🥳');
   });
 
   app.use(router);
@@ -29,8 +29,11 @@ export const setupServer = () => {
     }),
   );
 
+  // 404 handler
+
   app.use(notFoundHandler);
 
+  // General error handler
   app.use(errorHandler);
 
   const PORT = env(ENV_VARS.PORT, 3000);
