@@ -5,7 +5,7 @@ import {
   getContactById,
   updateContact,
 } from '../services/contacts.js';
-import createHttpError from 'http-errors';
+
 import { validationResult } from 'express-validator';
 
 export const getAllContactsController = async (req, res, next) => {
