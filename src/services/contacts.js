@@ -1,40 +1,37 @@
-import { ContactsCollection } from '../db/models/contact.js';
+import { ContactCollection } from '../db/contact.js';
 
 export const getAllContacts = async () => {
-  const contacts = await ContactsCollection.find();
+  const contacts = await ContactCollection.find();
   return contacts;
 };
 
-export const getContactById = async (id) => {
-  const contact = await ContactsCollection.findById(id);
+export const getContactById = async (contactId) => {
+  const contact = await ContactCollection.findById(contactId);
   return contact;
 };
 
 export const createContact = async (payload) => {
-  const contact = await ContactsCollection.create(payload);
+  const contact = await ContactCollection.create(payload);
   return contact;
 };
 
-export const updateContact = async (contactId, payload, option = {}) => {
-  const rawResult = await ContactsCollection.findOneAndUpdate(
-    { _id: contactId },
-    payload,
-    { new: true, includeResultMetadatas: true, ...option },
-  );
-
-  if (!rawResult || !rawResult.value) return null;
-
-  return {
-    contact: rawResult.value,
-    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
-  };
-};
-
 export const deleteContact = async (contactId) => {
-  const contact = await ContactsCollection.findByIdAndDelete({
+  const contact = await ContactCollection.findOneAndDelete({
     _id: contactId,
   });
   return contact;
 };
 
-// src/services/contacts.js
+export const updateContact = async (contactId, payload, options = {}) => {
+  const rawResult = await ContactCollection.findOneAndUpdate(
+    { _id: contactId },
+    payload,
+    { new: true, includeResultMetadata: true, ...options },
+  );
+
+  if (!rawResult || !rawResult.value) return null;
+  return {
+    contact: rawResult.value,
+    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+  };
+};

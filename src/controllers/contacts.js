@@ -1,113 +1,84 @@
-import createHttpError from 'http-errors';
+import mongoose from 'mongoose';
 import {
-  createContact,
-  deleteContact,
   getAllContacts,
   getContactById,
+  deleteContact,
   updateContact,
+  createContact,
 } from '../services/contacts.js';
+import createHttpError from 'http-errors';
 
 export const getContactsController = async (req, res) => {
-  try {
-    const contacts = await getAllContacts();
-    res.status(200).json({
-      data: contacts,
-      message: 'Successfully found contacts!',
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const contacts = await getAllContacts();
+
+  res.status(200).json({
+    status: res.statusCode,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
 
 export const getContactByIdController = async (req, res, next) => {
-  try {
-    const { contactId: id } = req.params;
-    const contact = await getContactById(id);
+  const { contactId } = req.params;
+  const contact = await getContactById(contactId);
 
-    if (!contact) {
-      return next(
-        createHttpError({
-          status: 404,
-          message: `Contact not found!`,
-          data: null,
-        }),
-      );
-    }
-
-    res.status(200).json({
-      data: contact,
-      message: `Successfully found contact with id ${id}!`,
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+    res.status(404).json({
+      message: 'Not found',
     });
-  } catch (err) {
-    next(err);
+    return;
   }
+
+  if (!contact) {
+    next(createHttpError(404, `Contact with id ${contactId} not found`));
+    return;
+  }
+
+  res.status(200).json({
+    status: res.statusCode,
+    message: `Successfully found contact whith id ${contactId}!`,
+    data: contact,
+  });
 };
 
-export const createContactController = async (req, res) => {
-  try {
-    const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+export const createContactController = async (req, res, next) => {
+  const contact = await createContact(req.body);
 
-    const newContact = await createContact({
-      name,
-      phoneNumber,
-      email,
-      isFavourite,
-      contactType,
-    });
-
-    res.status(201).json({
-      status: 'success',
-      message: 'Successfully created a contact!',
-      data: newContact,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  if (!contact) {
+    next(createHttpError(400, "Couldn't create new contact"));
+    return;
   }
+
+  res.status(201).json({
+    status: 201,
+    message: 'Successfully created a contact!',
+    data: contact,
+  });
 };
 
 export const patchContactController = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
+  const { contactId } = req.params;
+  const result = await updateContact(contactId, req.body);
 
-    const result = await updateContact(contactId, req.body);
-
-    if (!result) {
-      return next(
-        createHttpError({
-          status: 404,
-          message: `Contact not found!`,
-          data: null,
-        }),
-      );
-    }
-
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully patched a contact!',
-      data: result.contact,
-    });
-  } catch (err) {
-    next(err);
+  if (!result) {
+    next(createHttpError(404, 'Contact not found'));
+    return;
   }
+
+  res.json({
+    status: 200,
+    message: 'Successfully patched a contact!',
+    data: result.contact,
+  });
 };
 
 export const deleteContactController = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const contact = await deleteContact(contactId);
+  const { contactId } = req.params;
+  const contact = await deleteContact(contactId);
 
-    if (!contact) {
-      return next(
-        createHttpError({
-          status: 404,
-          message: `Contact not found!`,
-          data: null,
-        }),
-      );
-    }
-
-    res.status(204).send();
-  } catch (err) {
-    next(err);
+  if (!contact) {
+    next(createHttpError(404, 'Contact not found'));
+    return;
   }
+  res.sendStatus(204);
 };
