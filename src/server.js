@@ -13,6 +13,10 @@ const PORT = env('PORT', '3000');
 export const setupServer = () => {
   const app = express();
 
+  app.use('/', (req, res) => {
+    res.send('Hello..🥳');
+  });
+
   app.use(express.json());
   app.use(cors());
 

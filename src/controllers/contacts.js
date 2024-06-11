@@ -6,6 +6,7 @@ import {
   updateContact,
 } from '../services/contacts.js';
 import createHttpError from 'http-errors';
+import { validationResult } from 'express-validator';
 
 export const getAllContactsController = async (req, res, next) => {
   try {
@@ -41,6 +42,11 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const newContact = req.body;
   const createdContact = await createContact(newContact);
 
@@ -54,31 +60,43 @@ export const createContactController = async (req, res) => {
 export const patchContactController = async (req, res) => {
   const { contactId } = req.params;
   const patch = req.body;
+
+  if (!contactId) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Contact not found',
+      data: null,
+    });
+  }
+
   const result = await updateContact(contactId, patch);
 
-  if (!result || !contactId) {
+  if (!result) {
     return res.status(404).json({
-      status: '404',
+      status: 404,
       message: 'Contact not found',
       data: null,
     });
   }
 
   res.status(200).json({
-    status: '200',
+    status: 200,
     message: 'Successfully patched a contact!',
     data: result,
   });
 };
 
-export const deleteContactController = async (req, res, next) => {
+export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
   const result = await deleteContact(contactId);
 
   if (!result) {
-    next(createHttpError(404, 'Contact not found'));
-    return;
+    return res.status(404).json({
+      status: 'error',
+      message: 'Contact not found',
+      data: { message: 'Contact not found' },
+    });
   }
 
-  res.status(204).send();
+  res.status(204).end();
 };
