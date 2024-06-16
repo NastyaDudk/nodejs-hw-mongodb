@@ -9,7 +9,7 @@ import {
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { createContactSchema } from '../validation/createContacts.js';
-import { validateMongoId } from '../middlewares/valideteMongoId.js';
+import { validateMongoId } from '../middlewares/validateMongoId.js';
 import { updateContactSchema } from '../validation/updateContacts.js';
 
 const router = Router();
