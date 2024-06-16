@@ -8,7 +8,7 @@ import contactsRouter from './routers/contacts.js';
 
 const PORT = Number(env('PORT', '3000'));
 
-const setupServer = () => {
+export const setupServer = () => {
   const app = express();
   app.use(express.json());
   app.use(cors());
@@ -28,5 +28,3 @@ const setupServer = () => {
     console.log(`Server is running on ${PORT}`);
   });
 };
-
-export default setupServer;
