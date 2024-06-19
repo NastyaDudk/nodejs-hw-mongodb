@@ -1,4 +1,4 @@
-export const parseNumber = (number, defaultValue) => {
+const parseNumber = (number, defaultValue) => {
   const isString = typeof number === 'string';
   if (!isString) return defaultValue;
 
@@ -6,6 +6,7 @@ export const parseNumber = (number, defaultValue) => {
   if (Number.isNaN(parsedNumber)) {
     return defaultValue;
   }
+
   return parsedNumber;
 };
 

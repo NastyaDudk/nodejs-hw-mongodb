@@ -1,4 +1,4 @@
-import { SORT_ORDER } from '../contacts/index.js';
+import { SORT_ORDER } from '../constants/index.js';
 
 const parseSortOrder = (sortOrder) => {
   const isKnownOrder = [SORT_ORDER.ASC, SORT_ORDER.DESC].includes(sortOrder);
@@ -14,15 +14,13 @@ const parseSortBy = (sortBy) => {
     'email',
     'isFavourite',
     'contactType',
-    'createdAt',
-    'updatedAt',
   ];
 
   if (keysOfStudent.includes(sortBy)) {
     return sortBy;
   }
 
-  return 'name';
+  return '_id';
 };
 
 export const parseSortParams = (query) => {
