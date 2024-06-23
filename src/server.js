@@ -6,7 +6,6 @@ import router from './routers/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import cookieParser from 'cookie-parser';
-// import mongoose from 'mongoose';
 
 const PORT = Number(env('PORT', '3000'));
 
