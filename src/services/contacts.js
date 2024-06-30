@@ -1,17 +1,18 @@
+import { SORT_ORDER } from '../constants/constans.js';
 import { Contact } from '../db/contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import { SORT_ORDER } from '../constants/index.js';
 
 export const getAllContacts = async ({
-  page,
-  perPage,
+  userId,
+  page = 1,
+  perPage = 10,
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
   filter = {},
-  userId,
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
+
   const contactsQuery = Contact.find({ userId });
 
   if (filter.contactType) {
@@ -22,7 +23,7 @@ export const getAllContacts = async ({
   }
 
   const [contactsCount, contacts] = await Promise.all([
-    Contact.find().merge(contactsQuery).countDocuments(),
+    Contact.find({ userId }).merge(contactsQuery).countDocuments(),
     contactsQuery
       .skip(skip)
       .limit(limit)
@@ -39,19 +40,22 @@ export const getAllContacts = async ({
 };
 
 export const getContactById = async (contactId, userId) => {
-  const contact = await Contact.findOne({ _id: contactId, userId });
+  const contact = await Contact.findOne({
+    _id: contactId,
+    userId,
+  });
   return contact;
 };
 
-export const createContact = async (payload) => {
-  const contact = await Contact.create(payload);
+export const createContact = async (payload, userId) => {
+  const contact = await Contact.create({ ...payload, userId, });
   return contact;
 };
 
-export const upsertContact = async (
+export const updateContact = async (
   contactId,
-  userId,
   payload,
+  userId,
   options = {},
 ) => {
   const rawResult = await Contact.findOneAndUpdate(
@@ -63,9 +67,7 @@ export const upsertContact = async (
       ...options,
     },
   );
-
   if (!rawResult || !rawResult.value) return null;
-
   return {
     contact: rawResult.value,
     isNew: Boolean(rawResult?.lastErrorObject?.upserted),
@@ -77,6 +79,5 @@ export const deleteContact = async (contactId, userId) => {
     _id: contactId,
     userId,
   });
-
   return contact;
 };
