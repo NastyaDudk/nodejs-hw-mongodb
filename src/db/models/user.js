@@ -1,20 +1,25 @@
-import { model, Schema } from 'mongoose';
+import createHttpError from 'http-errors';
+import mongoose from 'mongoose';
 
-const usersSchema = new Schema(
+const { Schema, model } = mongoose;
+
+const userSchema = new Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    createdAt: { type: Date },
-    updatedAt: { type: Date },
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
   },
-  { timestamps: true, versionKey: false },
+  { versionKey: false, timestamps: true },
 );
 
-usersSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};
-
-export const User = model('users', usersSchema);
+export const UsersCollection = model('user', userSchema);
