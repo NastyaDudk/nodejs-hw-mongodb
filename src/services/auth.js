@@ -112,6 +112,9 @@ export const requestResetToken = async (email) => {
       expiresIn: '5m',
     },
   );
+  // console.log('\n', 'Reset Token: ', resetToken, '\n');
+
+  // return;
 
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
@@ -137,7 +140,10 @@ export const requestResetToken = async (email) => {
     });
   } catch (error) {
     console.log(error);
-    throw createHttpError(500, 'Failed to send the email, please try again later!');
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later!',
+    );
   }
 };
 
@@ -162,8 +168,5 @@ export const resetPwd = async (payload) => {
 
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
-  await User.updateOne(
-    { _id: user._id },
-    { password: encryptedPassword },
-  );
+  await User.updateOne({ _id: user._id }, { password: encryptedPassword });
 };

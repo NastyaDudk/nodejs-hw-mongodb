@@ -1,5 +1,11 @@
 import path from 'node:path';
 
+export const ENV_VARS = {
+  PORT: 'PORT',
+  JWT_SECRET: 'JWT_SECRET',
+  FRONTEND_HOST: 'FRONTEND_HOST',
+};
+
 export const MONGO_VARS = {
   MONGODB_USER: 'MONGODB_USER',
   MONGODB_PASSWORD: 'MONGODB_PASSWORD',
