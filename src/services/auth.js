@@ -1,121 +1,120 @@
 import createHttpError from 'http-errors';
-import { User } from '../db/user.js';
+import { User } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
-import { Session } from '../db/session.js';
-import {
-  FIFTEEN_MINUTES,
-  SMTP,
-  TEMPLATES_DIR,
-  THIRTY_DAYS,
-} from '../constants/constans.js';
+import crypto from 'crypto';
+import { Session } from '../db/models/session.js';
 import jwt from 'jsonwebtoken';
 import { env } from '../utils/env.js';
-import { sendEmail } from '../utils/sendMail.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { EMAIL_VARS, ENV_VARS, TEMPLATES_DIR } from '../constants/index.js';
+import path from 'path';
+import fs from 'fs/promises';
 import handlebars from 'handlebars';
-import path from 'node:path';
-import fs from 'node:fs/promises';
 
-export const registerUser = async (payload) => {
+const createSession = () => {
+  return {
+    accessToken: crypto.randomBytes(20).toString('base64'),
+    refreshToken: crypto.randomBytes(20).toString('base64'),
+    accessTokenValidUntil: Date.now() + 1000 * 60 * 15,
+    refreshTokenValidUntil: Date.now() + 1000 * 60 * 60 * 24 * 7,
+  };
+};
+
+export const createUser = async (payload) => {
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
+
   const user = await User.findOne({ email: payload.email });
-  if (user) throw createHttpError(409, 'Email in use');
 
-  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+  if (user) {
+    throw createHttpError(
+      409,
+      'User with this email already exist in database',
+    );
+  }
 
   return await User.create({
     ...payload,
-    password: encryptedPassword,
+    password: hashedPassword,
   });
 };
 
-export const loginUser = async (payload) => {
-  const user = await User.findOne({ email: payload.email });
+export const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email });
+
   if (!user) {
-    throw createHttpError(404, 'User not found');
+    throw createHttpError(404, 'User not found!');
   }
 
-  const isEqual = await bcrypt.compare(payload.password, user.password);
-  if (!isEqual) {
+  const areEqual = await bcrypt.compare(password, user.password);
+
+  if (!areEqual) {
     throw createHttpError(401, 'Unauthorized!');
   }
 
   await Session.deleteOne({ userId: user._id });
 
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-
   return await Session.create({
     userId: user._id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
+    ...createSession(),
   });
 };
 
-export const logoutUser = async ({ sessionId, refreshToken }) => {
-  await Session.deleteOne({
+export const logoutUser = async ({ sessionId, sessionToken }) => {
+  return await Session.deleteOne({
     _id: sessionId,
-    refreshToken,
+    refreshToken: sessionToken,
   });
 };
 
-const createSession = () => {
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-
-  return {
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
-  };
-};
-
-export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+export const refreshSession = async ({ sessionId, sessionToken }) => {
   const session = await Session.findOne({
     _id: sessionId,
-    refreshToken,
+    refreshToken: sessionToken,
   });
+
   if (!session) {
     throw createHttpError(401, 'Session not found');
   }
 
-  const isSessionTokenExpired =
-    new Date() > new Date(session.refreshTokenValidUntil);
-  if (isSessionTokenExpired) {
-    throw createHttpError(401, 'Session token expired');
+  if (new Date() > session.refreshTokenValidUntil) {
+    throw createHttpError(401, 'Refresh token is expired!');
   }
 
-  const newSession = createSession();
+  const user = await User.findById(session.userId);
 
-  await Session.deleteOne({ _id: sessionId, refreshToken });
+  if (!user) {
+    throw createHttpError(401, 'Session not found');
+  }
+
+  await Session.deleteOne({ _id: sessionId });
 
   return await Session.create({
-    userId: session.userId,
-    ...newSession,
+    userId: user._id,
+    ...createSession(),
   });
 };
 
 export const requestResetToken = async (email) => {
   const user = await User.findOne({ email });
+
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
+
   const resetToken = jwt.sign(
     {
       sub: user._id,
       email,
     },
-    env('JWT_SECRET'),
+    env(ENV_VARS.JWT_SECRET),
     {
-      expiresIn: '5m',
+      expiresIn: '15m',
     },
   );
 
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
-    'reset-password-email.html',
+    'send-reset-password-email.html',
   );
 
   const templateSource = (
@@ -123,32 +122,31 @@ export const requestResetToken = async (email) => {
   ).toString();
 
   const template = handlebars.compile(templateSource);
+
   const html = template({
     name: user.name,
-    link: `${env('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    link: `${env(ENV_VARS.FRONTEND_HOST)}/reset-password?token=${resetToken}`,
   });
 
   try {
     await sendEmail({
-      from: env(SMTP.SMTP_FROM),
+      from: env(EMAIL_VARS.SMTP_FROM),
       to: email,
       subject: 'Reset your password',
       html,
     });
   } catch (error) {
     console.log(error);
-    throw createHttpError(
-      500,
-      'Failed to send the email, please try again later!',
-    );
+
+    throw createHttpError(500, 'Problem with sending email');
   }
 };
 
-export const resetPwd = async (payload) => {
+export const resetPassword = async (payload) => {
   let entries;
 
   try {
-    entries = jwt.verify(payload.token, env('JWT_SECRET'));
+    entries = jwt.verify(payload.token, env(ENV_VARS.JWT_SECRET));
   } catch (error) {
     if (error instanceof Error) throw createHttpError(401, error.message);
     throw error;

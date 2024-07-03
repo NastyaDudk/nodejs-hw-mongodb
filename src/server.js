@@ -2,21 +2,21 @@ import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import { env } from './utils/env.js';
-import router from './routers/index.js';
-import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import {
+  notFoundMiddleware,
+  errorHandlerMiddleware,
+} from './middlewares/index.js';
+import { ENV_VARS, UPLOAD_DIR } from './constants/index.js';
+import rootRouter from './routers/index.js';
 import cookieParser from 'cookie-parser';
-import { UPLOAD_DIR } from './constants/constans.js';
 
-const PORT = Number(env('PORT', '3000'));
+const PORT = Number(env(ENV_VARS.PORT, '3000'));
 
-export const setupServer = () => {
+export const startServer = () => {
   const app = express();
 
   app.use(express.json());
-
   app.use(cors());
-
   app.use(cookieParser());
 
   app.use(
@@ -27,15 +27,21 @@ export const setupServer = () => {
     }),
   );
 
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Hello world!',
+    });
+  });
+
   app.use('/uploads', express.static(UPLOAD_DIR));
 
-  app.use(router);
+  app.use(rootRouter);
 
-  app.use('*', notFoundHandler);
+  app.use(notFoundMiddleware);
 
-  app.use(errorHandler);
+  app.use(errorHandlerMiddleware);
 
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on ${PORT}`);
   });
 };
