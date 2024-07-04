@@ -56,13 +56,13 @@ export const getContactById = async (contactId) => {
   return contact;
 };
 
-export const createContact = async ({ avatar, ...payload }, userId) => {
-  const url = await saveFile(avatar);
+export const createContact = async ({ photo, ...payload }, userId) => {
+  const url = await saveFile(photo);
 
   const contact = await ContactsCollection.create({
     ...payload,
     parentId: userId,
-    avatarUrl: url,
+    photoUrl: url,
   });
   return contact;
 };

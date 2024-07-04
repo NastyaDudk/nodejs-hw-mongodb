@@ -8,7 +8,7 @@ const contactsSchema = new Schema(
     avgMark: { type: Number, required: true },
     onDuty: { type: Boolean, required: true, default: false },
     parentId: { type: Schema.ObjectId, required: true },
-    avatarUrl: { type: String },
+    photoUrl: { type: String },
   },
   {
     timestamps: true,
