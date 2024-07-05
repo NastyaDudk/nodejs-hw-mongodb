@@ -1,4 +1,4 @@
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/index.js';
+import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/constans.js';
 import { initMongoDB } from './db/initMongoDB.js';
 import { startServer } from './server.js';
 import { createFolderIfNotExist } from './utils/createFolderIfNotExist.js';

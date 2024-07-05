@@ -52,7 +52,7 @@ export const logoutUserController = async (req, res) => {
   res.status(204).send();
 };
 
-export const refreshTokenController = async (req, res) => {
+export const refreshUserSessionController = async (req, res) => {
   const { sessionId, sessionToken } = req.cookies;
   const session = await refreshSession({ sessionId, sessionToken });
 
@@ -65,7 +65,7 @@ export const refreshTokenController = async (req, res) => {
   });
 };
 
-export const requestResetEmailController = async (req, res) => {
+export const sendResetEmailController = async (req, res) => {
   await requestResetToken(req.body.email);
 
   res.json({
@@ -75,7 +75,7 @@ export const requestResetEmailController = async (req, res) => {
   });
 };
 
-export const resetPasswordController = async (req, res) => {
+export const resetPwdController = async (req, res) => {
   await resetPassword(req.body);
 
   res.json({

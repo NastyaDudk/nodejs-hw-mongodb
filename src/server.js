@@ -2,11 +2,9 @@ import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import { env } from './utils/env.js';
-import {
-  notFoundMiddleware,
-  errorHandlerMiddleware,
-} from './middlewares/index.js';
-import { ENV_VARS, UPLOAD_DIR } from './constants/index.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { ENV_VARS, UPLOAD_DIR } from './constants/constans.js';
 import rootRouter from './routers/index.js';
 import cookieParser from 'cookie-parser';
 
@@ -37,9 +35,9 @@ export const startServer = () => {
 
   app.use(rootRouter);
 
-  app.use(notFoundMiddleware);
+  app.use(notFoundHandler);
 
-  app.use(errorHandlerMiddleware);
+  app.use(errorHandler);
 
   app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);

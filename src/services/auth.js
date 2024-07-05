@@ -6,7 +6,7 @@ import { Session } from '../db/models/session.js';
 import jwt from 'jsonwebtoken';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendEmail.js';
-import { EMAIL_VARS, ENV_VARS, TEMPLATES_DIR } from '../constants/index.js';
+import { EMAIL_VARS, ENV_VARS, TEMPLATES_DIR } from '../constants/constans.js';
 import path from 'path';
 import fs from 'fs/promises';
 import handlebars from 'handlebars';

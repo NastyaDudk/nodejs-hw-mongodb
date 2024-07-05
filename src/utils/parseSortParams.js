@@ -1,4 +1,4 @@
-import { SORT_ORDER } from '../constants/index.js';
+import { SORT_ORDER } from '../constants/constans.js';
 
 const parseSortOrder = (sortOrder) => {
   const isKnownOrder = [SORT_ORDER.ASC, SORT_ORDER.DESC].includes(sortOrder);
@@ -7,18 +7,18 @@ const parseSortOrder = (sortOrder) => {
 };
 
 const parseSortBy = (sortBy) => {
-  const keysOfStudent = [
+  const keysOfContact = [
     '_id',
     'name',
-    'age',
-    'gender',
-    'avgMark',
-    'onDuty',
+    'phoneNumber',
+    'email',
+    'isFavourite',
+    'contactType',
     'createdAt',
     'updatedAt',
   ];
 
-  if (keysOfStudent.includes(sortBy)) {
+  if (keysOfContact.includes(sortBy)) {
     return sortBy;
   }
 
