@@ -8,6 +8,7 @@ import {
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 export const getContactsController = async (req, res, next) => {
   try {
@@ -31,7 +32,6 @@ export const getContactsController = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getContactByIdController = async (req, res, next) => {
   try {
     const contactId = req.params.contactId;
@@ -80,27 +80,31 @@ export const createContactController = async (req, res, next) => {
 
 export const patchContactController = async (req, res, next) => {
   try {
-    const { body, file } = req;
     const { contactId } = req.params;
     const userId = req.user._id;
-    const { contact } = await updateContact(
-      contactId,
-      { ...body, photo: file.path },
-      userId,
-      {},
-    );
 
-    if (!contact) {
-      throw createHttpError(
-        404,
-        'Contact not found or you are not authorized to update it',
-      );
+    const { body, file } = req;
+    let photoUrl;
+
+    if (file) {
+      photoUrl = await saveFileToCloudinary(file);
     }
 
+    const payload = { ...body, photo: photoUrl };
+    const options = { new: true };
+
+    const { contact, isNew } = await updateContact(
+      { _id: contactId, userId },
+      payload,
+      options,
+    );
+
+    const cleanedContact = { ...contact.toObject() };
+    delete cleanedContact.password;
+
     res.status(200).json({
-      status: 200,
-      message: 'Successfully patched contact!',
-      data: contact,
+      message: 'Successfully patched a contact!',
+      data: { contact: cleanedContact, isNew },
     });
   } catch (error) {
     next(error);
@@ -114,11 +118,9 @@ export const putContactController = async (req, res, next) => {
     const userId = req.user._id;
     const { isNew, contact } = await updateContact(
       contactId,
-      { ...body, photo: file },
       userId,
-      {
-        upsert: true,
-      },
+      { ...body, photo: file },
+      { upsert: true },
     );
 
     if (!contact) {

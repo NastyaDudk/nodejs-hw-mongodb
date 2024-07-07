@@ -24,6 +24,7 @@ export const getAllContacts = async ({
   const [contactsCount, contacts] = await Promise.all([
     ContactsCollection.find().merge(contactsQuery).countDocuments(),
     contactsQuery
+      .select('-password')
       .skip(skip)
       .limit(limit)
       .sort({ [sortBy]: sortOrder })
@@ -39,7 +40,10 @@ export const getAllContacts = async ({
 };
 
 export const getContactById = async (contactId, userId) => {
-  const contact = await ContactsCollection.findOne({ _id: contactId, userId });
+  const contact = await ContactsCollection.findOne(
+    { _id: contactId, userId },
+    { password: 0 },
+  );
   return contact;
 };
 
@@ -59,11 +63,11 @@ export const updateContact = async (authContactId, payload, options = {}) => {
     },
   );
 
-  if (!rawResult) return null;
+  if (!rawResult || !rawResult.value) return null;
 
   return {
-    contact: rawResult,
-    isNew: Boolean(rawResult.lastErrorObject.upserted),
+    contact: rawResult.value,
+    isNew: Boolean(rawResult.lastErrorObject?.upserted),
   };
 };
 
