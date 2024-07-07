@@ -108,7 +108,7 @@ export const requestResetToken = async (email) => {
     },
     env(ENV_VARS.JWT_SECRET),
     {
-      expiresIn: '15m',
+      expiresIn: '2h',
     },
   );
 
