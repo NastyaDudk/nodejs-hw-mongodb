@@ -1,13 +1,12 @@
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/constans.js';
-import { initMongoDB } from './db/initMongoDB.js';
-import { startServer } from './server.js';
-import { createFolderIfNotExist } from './utils/createFolderIfNotExist.js';
+import { TEMP_UPLOAD_DIR } from "./constants/index.js";
+import { initMongoConnection } from "./db/initMongoConnection.js";
+import { setupServer } from "./server.js";
+import { createDirIfNotExists } from "./utils/createDirIfNotExists.js";
 
 const bootstrap = async () => {
-  await initMongoDB();
-  await createFolderIfNotExist(TEMP_UPLOAD_DIR);
-  await createFolderIfNotExist(UPLOAD_DIR);
-  startServer();
+    await initMongoConnection();
+    await createDirIfNotExists(TEMP_UPLOAD_DIR);
+    setupServer();
 };
 
 bootstrap();
