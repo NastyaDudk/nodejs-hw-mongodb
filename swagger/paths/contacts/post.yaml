@@ -16,10 +16,10 @@ requestBody:
         properties:
           name:
             type: string
-            example: Ihor Slakva
+            example: Vadya
           phoneNumber:
             type: string
-            example: 0662345269
+            example: 658654657374
           isFavourite:
             type: boolean
             example: false
@@ -31,10 +31,10 @@ requestBody:
               - personal
           userId:
             type: string
-            example: 666d4aea82f0d0eccc0ae09d
+            example: 6687bd0b07d349529f997ba9
           photo:
             type: string
-            example: https://res.cloudinary.com/dh6h5bqnx/image/upload/v1719597092/cctnl1rniapmfrc4tdsh.jpg
+            example: https://res.cloudinary.com/dzx2rxopv/image/upload/v1720624474/gi9t0hmriyhjvyxdoqwk.jpg
 responses:
   '201':
     description: 'Successfully created a contact!'

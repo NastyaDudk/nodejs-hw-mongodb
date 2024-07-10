@@ -7,10 +7,10 @@ required:
 properties:
   name:
     type: string
-    example: Ihor
+    example: Vadya
   phoneNumber:
     type: string
-    example: 0662345269
+    example: 658654657374
   isFavourite:
     type: boolean
     example: false
@@ -22,7 +22,7 @@ properties:
       - personal
   userId:
     type: string
-    example: 666d4aea82f0d0eccc0ae09d
+    example: 6687bd0b07d349529f997ba9
   photo:
     type: string
-    example: https://res.cloudinary.com/dzx2rxopv/image/upload/v1720601642/rpxqlr9ylzjxzntu8kby.jpg
+    example: https://res.cloudinary.com/dzx2rxopv/image/upload/v1720624474/gi9t0hmriyhjvyxdoqwk.jpg
