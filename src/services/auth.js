@@ -15,6 +15,8 @@ import path from 'node:path';
 import handlebars from 'handlebars';
 import fs from 'node:fs/promises';
 import { sendEmail } from '../utils/sendEmail.js';
+import { getFullNameFromGoogleTokenPayload } from '../utils/googleOAuth.js';
+import { validateCode } from '../utils/googleOAuth.js';
 
 export const registerUser = async (payload) => {
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
@@ -168,4 +170,30 @@ export const resetPassword = async (payload) => {
   await User.updateOne({ _id: user._id }, { password: encryptedPassword });
 
   await Session.deleteOne({ userId: user._id });
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+
+  if (!payload) throw createHttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+
+  if (!user) {
+    const password = await bcrypt.hash(crypto.randomBytes(10), 10);
+
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+    });
+  }
+
+  await Session.deleteOne({ userId: user._id });
+
+  return await Session.create({
+    userId: user._id,
+    ...createSession(),
+  });
 };
