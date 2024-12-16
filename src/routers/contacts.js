@@ -1,21 +1,24 @@
+
 import { Router } from 'express';
-import {
-  createContactController,
-  deleteContactController,
-  getContactByIdController,
-  getContactsController,
-  patchContactController,
-} from '../controllers/contacts.js';
+import { createContactController, deleteContactController, getContactByIdController, getContactsController, patchContactController } from '../controllers/contacts.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import { createContactSchema, updateContactSchema } from '../validation/contacts.js';
+import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/multer.js';
 
-export const router = Router();
+const contactsRouter = Router();
 
-router.get('/contacts', ctrlWrapper(getContactsController));
+contactsRouter.use(authenticate);
 
-router.get('/contacts/:contactId', ctrlWrapper(getContactByIdController));
+contactsRouter.get('/', ctrlWrapper(getContactsController));
 
-router.post('/contacts', ctrlWrapper(createContactController));
+contactsRouter.get('/:contactId', ctrlWrapper(getContactByIdController));
 
-router.patch('/contacts/:contactId', ctrlWrapper(patchContactController));
+contactsRouter.post('/', upload.single('photo'), validateBody(createContactSchema), ctrlWrapper(createContactController));
 
-router.delete('/students/:contactId', ctrlWrapper(deleteContactController));
+contactsRouter.patch('/:contactId',upload.single('photo'), validateBody(updateContactSchema), ctrlWrapper(patchContactController));
+
+contactsRouter.delete('/:contactId', ctrlWrapper(deleteContactController));
+
+export default contactsRouter;
