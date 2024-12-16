@@ -1,0 +1,28 @@
+type: object
+required:
+  - name
+  - phoneNumber
+  - contactType
+  - userId
+properties:
+  name:
+    type: string
+    example: Vadya
+  phoneNumber:
+    type: string
+    example: 658654657374
+  isFavourite:
+    type: boolean
+    example: false
+  contactType:
+    type: string
+    enum:
+      - work
+      - home
+      - personal
+  userId:
+    type: string
+    example: 6687bd0b07d349529f997ba9
+  photo:
+    type: string
+    example: https://res.cloudinary.com/dzx2rxopv/image/upload/v1720624474/gi9t0hmriyhjvyxdoqwk.jpg
