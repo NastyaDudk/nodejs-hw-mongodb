@@ -1,4 +1,4 @@
-import { ContactsCollection } from '../db/models/contact.js';
+import { ContactsCollection } from '../db/models/contacts.js';
 
 export const getAllContacts = async () => {
   const contacts = await ContactsCollection.find();
@@ -10,31 +10,27 @@ export const getContactById = async (id) => {
   return contact;
 };
 
-export const createContact = async (payload) => {
-  const contact = await ContactsCollection.create(payload);
-  return contact;
+export const createContact = async (newContact) => {
+  const createdContact = await ContactsCollection.create(newContact);
+  return createdContact;
 };
 
-export const updateContact = async (contactId, payload, option = {}) => {
-  const rawResult = await ContactsCollection.findOneAndUpdate(
+export const updateContact = async (contactId, payload, options = {}) => {
+  const updatedContact = await ContactsCollection.findOneAndUpdate(
     { _id: contactId },
     payload,
-    { new: true, includeResultMetadatas: true, ...option },
+    { new: true, includeResultMetadata: true, ...options },
   );
 
-  if (!rawResult || !rawResult.value) return null;
+  if (!updatedContact || !updatedContact.value) return null;
 
-  return {
-    contact: rawResult.value,
-    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
-  };
+  return updatedContact.value;
 };
 
 export const deleteContact = async (contactId) => {
-  const contact = await ContactsCollection.findByIdAndDelete({
+  const deletedContact = await ContactsCollection.findOneAndDelete({
     _id: contactId,
   });
-  return contact;
-};
 
-// src/services/contacts.js
+  return deletedContact;
+};

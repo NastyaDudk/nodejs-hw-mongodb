@@ -1,21 +1,20 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import { ENV_VARS } from './constants/index.js';
+import dotenv from 'dotenv';
 import { env } from './utils/env.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import contactsRouter from './routers/contacts.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import { router } from './routers/contacts.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+
+dotenv.config();
+const PORT = env('PORT', '3000');
 
 export const setupServer = () => {
   const app = express();
 
-  app.set('etag', false);
-
   app.use(express.json());
   app.use(cors());
-
-  app.use(router);
 
   app.use(
     pino({
@@ -25,14 +24,15 @@ export const setupServer = () => {
     }),
   );
 
-  // 404 handler
+  app.use(contactsRouter);
 
-  app.use(notFoundHandler);
+  app.use('/', (req, res) => {
+    res.send('Hello..🥳');
+  });
 
-  // General error handler
+  app.use('*', notFoundHandler);
+
   app.use(errorHandler);
-
-  const PORT = env(ENV_VARS.PORT, 3000);
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
